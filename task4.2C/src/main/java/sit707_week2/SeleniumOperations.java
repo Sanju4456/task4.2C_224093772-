@@ -4,62 +4,58 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 public class SeleniumOperations {
 
-    public static void sleep(int sec) {
-        try {
-            Thread.sleep(sec * 1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+    private WebDriver driver;
+    private WebDriverWait wait;
 
-    public static WebDriver bunningsLoginPage(String url, String email, String password) throws IOException {
+    public SeleniumOperations() {
         System.setProperty("webdriver.gecko.driver", "C:/Users/sanju/geckodriver-v0.34.0-win32/geckodriver.exe");
+        driver = new FirefoxDriver();
+        wait = new WebDriverWait(driver, 10);
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+    }
 
-        System.out.println("Fire up Firefox browser.");
-        WebDriver driver = new FirefoxDriver();
+    public void openLoginPage() {
+        driver.get("https://www.bunnings.com.au/login");
+    }
 
-        System.out.println("Driver info: " + driver);
-        sleep(2);
-        driver.get(url);
+    public void enterCredentials(String email, String password) {
+        WebElement emailField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login_email")));
+        emailField.sendKeys(email);
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebElement passwordField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login_password")));
+        passwordField.sendKeys(password);
+    }
 
-        try {
-            WebElement emailInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login_email")));
-            emailInput.sendKeys(email);
+    public void clickLoginButton() {
+        WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("login_button")));
+        loginButton.click();
+    }
 
-            WebElement passwordInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login_password")));
-            passwordInput.sendKeys(password);
+    public String getCurrentUrl() {
+        return driver.getCurrentUrl();
+    }
 
-            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("login_button")));
-            loginButton.click();
+    public String getErrorMessage() {
+        WebElement errorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("error-message")));
+        return errorMessage.getText();
+    }
 
-            // Take a screenshot after attempting login
-            File screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            FileUtils.copyFile(screenshotFile, new File("./screenshot/screen.png"));
-
-            // Return the driver for further verification in the test
-            return driver;
-
-        } catch (Exception e) {
-            // Take a screenshot if there is an error
-            File screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            FileUtils.copyFile(screenshotFile, new File("./screenshot/error.png"));
+    public void quit() {
+        if (driver != null) {
             driver.quit();
-            throw e;
         }
     }
+
+	public static void bunningsLoginPage(String string, Object object, Object object2) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
